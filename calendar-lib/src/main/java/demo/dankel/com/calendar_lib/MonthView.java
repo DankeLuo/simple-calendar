@@ -525,6 +525,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
      */
     public void backToToday() {
         mMonthOffset = 0;
+        mLastSelection = null;
         calculateDaysOnNearestThreeMonth();
         scrollTo(0,0);
         invalidate();

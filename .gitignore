@@ -1,3 +1,12 @@
+/demo/demo.iml
+/demo/build
+/gradle
+/simple-calendar.iml
+/gradlew
+/build
+/.gradle
+/calendar-lib/build
+/calendar-lib/calendar-lib.iml
 *.class
 
 # Mobile Tools for Java (J2ME)
