@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="MonthView">
+        <attr name="firstDayOfWeek" format="enum" >
+            <enum name="Sunday" value="1" />
+            <enum name="Monday" value="2" />
+        </attr>
+    </declare-styleable>
+</resources>

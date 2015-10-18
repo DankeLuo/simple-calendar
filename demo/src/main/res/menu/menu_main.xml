@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/menu_more"
+        android:icon="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+        android:orderInCategory="80"
+        android:title="更多"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/menu_first_day_of_week"
+                android:orderInCategory="80"
+                android:title="周首日"
+                app:showAsAction="always">
+
+            </item>
+            <item
+                android:id="@+id/menu_back_to_today"
+                android:orderInCategory="80"
+                android:title="回到今天"
+                app:showAsAction="always">
+
+            </item>
+            <item
+                android:id="@+id/menu_show_lunar"
+                android:orderInCategory="80"
+                android:title="农历显示"
+                app:showAsAction="always">
+
+            </item>
+        </menu>
+    </item>
+
+
+</menu>
