@@ -15,9 +15,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Scroller;
 
@@ -33,6 +35,9 @@ import java.util.Map;
  */
 public class MonthView extends View implements ValueAnimator.AnimatorUpdateListener {
     private static final String TAG = "MonthView";
+    private static final float mDateNumTextSize = 14;  // 日期数字字体大小，单位sp
+    private static final float mLunarTextSize = 10;  // 农历日期字体大小，单位sp
+
     private Context context;
 
     private TextPaint mTextPaint;
@@ -55,6 +60,8 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
     private SelectedDateInfo mLastSelection;
     private float mCellWidth;
     private ShapeDrawable mBackgroundShape;
+    private float density;   // 屏幕像素密度系数
+    private int mTouchSlop = 0;   //
 
     public MonthView(Context context) {
         super(context);
@@ -86,6 +93,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
         mTextPaint.setTextAlign(Paint.Align.CENTER);
 
         mScroller = new Scroller(context);
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         // Update TextPaint and text measurements from attributes
         invalidateTextPaintAndMeasurements();
@@ -254,11 +262,15 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
     }
 
     private void invalidateTextPaintAndMeasurements() {
-        mTextPaint.setTextSize(28);
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        density = displayMetrics.density;
+        mTextPaint.setTextSize(mDateNumTextSize * density);
         mTextPaint.setColor(0xff505050);
 
         Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
         mTextHeight = fontMetrics.bottom;
+
+        Log.d(TAG, fontMetrics.top + "," + fontMetrics.ascent + "," + fontMetrics.descent + "," + fontMetrics.bottom + "");
     }
 
     @Override
@@ -268,7 +280,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
         float height;
         if (null == mCurrMonthArray[4][0]) {
             height = measureWidth * 4 / 7;
-        }else if (null == mCurrMonthArray[5][0]) {
+        } else if (null == mCurrMonthArray[5][0]) {
             height = measureWidth * 5 / 7;
         } else {
             height = measureWidth * 6 / 7;
@@ -369,10 +381,13 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
                 }
                 canvas.drawRect(column * dayWidth, row * dayWidth, (column + 1) * dayWidth, (row + 1) * dayWidth, mPaint);
                 float baseline = row * dayWidth + (dayWidth - fontMetrics.bottom + fontMetrics.top) / 2 - fontMetrics.top;
-                if (null != mLastSelection && mLastSelection.getRow() == row && mLastSelection.getColumn() == column && mMonthOffset == (int)mLastSelection.getSelectedOffSet()) {
+                if (null != mLastSelection && mLastSelection.getRow() == row && mLastSelection.getColumn() == column && mMonthOffset == (int) mLastSelection.getSelectedOffSet()) {
                     mTextPaint.setColor(Color.WHITE);
                 }
-                canvas.drawText(mDateStr, column * dayWidth + dayWidth / 2, baseline, mTextPaint);
+                canvas.drawText(mDateStr, column * dayWidth + dayWidth / 2, baseline - 20, mTextPaint);
+                mTextPaint.setTextSize(mLunarTextSize * density);
+                canvas.drawText(mCurrMonthDateArray[row][column].split("-")[3], column * dayWidth + dayWidth / 2, baseline + mTextHeight, mTextPaint);
+                mTextPaint.setTextSize(mDateNumTextSize * density);
                 mTextPaint.setColor(0xff505050);
             }
         }
@@ -403,7 +418,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
                 smoothScrollTo(totalMoveX, 0);
                 break;
             case MotionEvent.ACTION_UP:
-                if (Math.abs(lastPointX - event.getX()) > 10) {
+                if (Math.abs(lastPointX - event.getX()) > mTouchSlop) {
                     if (lastPointX > event.getX()) {
                         if (Math.abs(lastPointX - event.getX()) >= getWidth() / 5) {
                             mMonthOffset++;
@@ -507,6 +522,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
 
     /**
      * 是否把周首日设置为周日
+     *
      * @param flag true则周日为每周首日，false则周一为每周首日
      */
     public void setSundayFirstDayOfWeek(boolean flag) {
@@ -527,7 +543,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
         mMonthOffset = 0;
         mLastSelection = null;
         calculateDaysOnNearestThreeMonth();
-        scrollTo(0,0);
+        scrollTo(0, 0);
         invalidate();
     }
 
@@ -537,7 +553,7 @@ public class MonthView extends View implements ValueAnimator.AnimatorUpdateListe
         Bundle mSaveState = new Bundle();
         mSaveState.putParcelable("saveInstanceState", state);
         mSaveState.putParcelable("selectedDateInfo", mLastSelection);
-        mSaveState.putInt("firstDayOfWeek",FIRST_DAY_OF_WEEK);
+        mSaveState.putInt("firstDayOfWeek", FIRST_DAY_OF_WEEK);
 
         return mSaveState;
     }
